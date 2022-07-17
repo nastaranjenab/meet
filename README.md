@@ -51,7 +51,7 @@ As a user I should be able to use the app when internet isn’t available So tha
 - Scenario : Show error when user changes the settings (city, time range)
   - Given: The user tries to change the cached info offline
   - When: The user changes the search settings
-  - Then: An error message is displayed
+  - Then: An error message is displayed.
 
 ## FEATURE 5: DATA VISUALIZATION
 
