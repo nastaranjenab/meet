@@ -4,7 +4,7 @@ This application is built so users can find events in their locations. It will b
 
 ## Feature 2: Show/Hide Event's Details
 
-As a user, I should be able to click on the event to show/hide it So that I can show/hide the details.
+As a user,I should be able to click on the event to show/hide it So that I can show/hide the details.
 
 - Scenario : An event element is collapsed by default
 
