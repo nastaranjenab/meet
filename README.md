@@ -60,4 +60,8 @@ As a user I should be able to see a chart view of upcoming events by dates and t
 - Scenario : Show a chart with the number of upcoming events in each city
   - Given: The user wants to see upcoming events
   - When: The user opens the app or does a search for events
+<<<<<<< HEAD
   - Then: A chart of upcoming events is displayed
+=======
+  - Then: A chart of upcoming events is displayed
+>>>>>>> 492a6577ca9c31dc330a4996214c354969a78c6d
