@@ -1,54 +1,66 @@
 import React, { Component } from 'react';
 
-export class CitySearch extends Component {
-  handleInputChanged = (event) => {
-    const value = event.target.value;
-    const suggestions = this.props.locations.filter((location) => {
-      return location.toUpperCase().indexOf(value.toUpperCase()) > -1;
-    });
-    this.setState({ query: value, suggestions });
-  };
+class CitySearch extends Component {
+    state = {
+        query: '',
+        suggestions: [],
+        showSuggestions: undefined
+    }
 
-  handleItemClicked = (suggestion) => {
-    this.setState({
-      query: suggestion
-    });
-  };
+    handleInputChanged = (event) => {
+        const value = event.target.value;
+        this.setState({ showSuggestions: true });
+        const suggestions = this.props.locations.filter((location) => {
+            return location.toUpperCase().indexOf(value.toUpperCase()) > -1;
+        });
+        this.setState({
+            query: value,
+            suggestions,
+        });
+    };
 
-  // // traditional way of initializing
-  // constructor() {
-  //   super();
-  //   this.state = { query: '' };
-  // }
+    handleItemClicked = (suggestion) => {
+        this.setState({
+            query: suggestion,
+            showSuggestions: false,
+        });
 
-  //Another way to define a class component's state
-  state = { query: '', suggestions: [] };
+        this.props.updateEvents(suggestion);
+    }
 
-  render() {
-    return (
-      <div className="CitySearch">
-        <input
-          type="text"
-          className="city"
-          value={this.state.query}
-          onChange={this.handleInputChanged}
-        />
-        <ul className="suggestions">
-          {this.state.suggestions.map((suggestion) => (
-            <li
-              key={suggestion}
-              onClick={() => this.handleItemClicked(suggestion)}
-            >
-              {suggestion}
-            </li>
-          ))}
-          <li key="all">
-            <b>See all cities</b>
-          </li>
-        </ul>
-      </div>
-    );
-  }
+    render() {
+        return (
+            <div className="CitySearch">
+                <input
+                    type="text"
+                    id="city"
+                    placeholder="Select city:"
+                    className="city"
+                    value={this.state.query}
+                    onChange={this.handleInputChanged}
+                    onFocus={() => { this.setState({ showSuggestions: true }) }}
+                />
+                <ul 
+                    className="suggestions" 
+                    style={this.state.showSuggestions 
+                        ? {}
+                        : { display: 'none' }
+                    }>
+                    {
+                        this.state.suggestions.map((suggestion) => (
+                            <li
+                                key={suggestion}
+                                onClick={() => this.handleItemClicked(suggestion)}>{suggestion}
+                            </li>
+                        ))
+                    }
+                    <li onClick={() => this.handleItemClicked("all")}>
+                        <b>See all cities</b>
+                    </li>
+                </ul>
+            </div>
+        );
+    }
 }
 
-export default CitySearch;
+export default CitySearch; 

@@ -1,17 +1,60 @@
-import React from 'react';
+import React, { Component } from 'react';
 import './App.css';
 import CitySearch from './CitySearch';
 import EventList from './EventList';
 import NumberOfEvents from './NumberOfEvents';
+import { getEvents, extractLocations } from './api';
 
-function App() {
+
+class App extends Component {
+
+  state = {
+      events: [],
+      locations: [],
+      locationSelected: 'all',
+      numberOfEvents: 32
+  }
+
+  componentDidMount() {
+    this.mounted = true;
+    getEvents().then((events) => {
+      if (this.mounted) {
+        this.setState({ events, locations: extractLocations(events) });
+      }
+    });
+  }
+
+  componentWillUnmount(){
+    this.mounted = false;
+  }
+  
+  updateEvents = (location) => {
+    getEvents().then((events) => {
+      const locationEvents = (location === 'all') ?
+        events :
+        events.filter((event) => event.location === location);
+      this.setState({
+        events: locationEvents
+      });
+    });
+  }
+
+render() {
   return (
-    <div className="App">
-      <EventList />
-      <CitySearch />
-      <NumberOfEvents />
-    </div>
+      <div className="App">
+          <CitySearch 
+              locations={this.state.locations}  
+              updateEvents={this.updateEvents} />
+          <NumberOfEvents 
+              events={this.state.events}
+              updateEvents={this.updateEvents}/>
+          <EventList 
+              events={this.state.events}/>        
+      </div>
   );
 }
+}
+
+
 
 export default App;
