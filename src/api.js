@@ -17,14 +17,6 @@ import NProgress from 'nprogress';
   return locations;
 };
 
-export const getEvents = async () => {
-  NProgress.start();
-
-  if (window.location.href.startsWith("http://localhost")) {
-    NProgress.done();
-    return mockData;
-  }
-
 
   const removeQuery = () => {
     if (window.history.pushState && window.location.pathname) {
@@ -39,6 +31,23 @@ export const getEvents = async () => {
       window.history.pushState("", "", newurl);
     }
   };
+
+
+  export const getEvents = async () => {
+    NProgress.start();
+
+    if (window.location.href.startsWith("http://localhost")) {
+        NProgress.done();
+        return mockData;
+    }
+    if (!navigator.onLine) {
+        const data = localStorage.getItem("lastEvents");
+        NProgress.done();
+        return data 
+            ? JSON.parse(data).events 
+            : [];
+    }
+
 
   const token = await getAccessToken();
 
