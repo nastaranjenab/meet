@@ -1,11 +1,12 @@
 import React, { Component } from "react";
+import "./App.css";
 import NumberOfEvents from "./NumberOfEvents";
 import EventList from "./EventList";
 import CitySearch from "./CitySearch";
 import WelcomeScreen from "./WelcomeScreen";
 import { getEvents, extractLocations, checkToken, getAccessToken } from "./api";
 import { OfflineAlert } from "./Alert";
-import "./App.css";
+
 
 class App extends Component {
   state = {
