@@ -1,4 +1,3 @@
-import "./nprogress.css";
 import "./App.css";
 import React, { Component } from "react";
 import NumberOfEvents from "./NumberOfEvents";
