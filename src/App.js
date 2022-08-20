@@ -1,113 +1,88 @@
-import "./nprogress.css";
-import "./App.css";
-import React, { Component } from "react";
-import NumberOfEvents from "./NumberOfEvents";
-import EventList from "./EventList";
-import CitySearch from "./CitySearch";
-import WelcomeScreen from "./WelcomeScreen";
-import { getEvents, extractLocations, checkToken, getAccessToken } from "./api";
-import { OfflineAlert } from "./Alert";
+import React, { Component } from 'react';
+import './App.css';
+import EventList from './EventList';
+import CitySearch from './CitySearch';
+import NumberOfEvents from './NumberOfEvents';
+import { getEvents, extractLocations } from './api';
+import './nprogress.css';
+import { WarningAlert } from "./Alert";
+
 
 class App extends Component {
-  state = {
-    events: [],
-    locations: [],
-    currentLocation: "all",
-    numberOfEvents: 15,
-    showWelcomeScreen: undefined,
-    isOnline: navigator.onLine,
-  };
 
-  async componentDidMount() {
-    this.mounted = true;
-    window.addEventListener("offline", (e) => {
-      this.setState({ isOnline: false });
-    });
-    window.addEventListener("online", (e) => {
-      this.setState({ isOnline: true });
-    });
+    state = {
+        events: [],
+        locations: [],
+        locationSelected: 'all',
+        numberOfEvents: 32
+    }
 
-    const accessToken = localStorage.getItem("access_token");
-    const isTokenValid =
-      !window.location.href.startsWith("http://localhost") &&
-      !(accessToken && !navigator.onLine) &&
-      (await checkToken(accessToken)).error
-        ? false
-        : true;
-    const searchParams = new URLSearchParams(window.location.search);
-    const code = searchParams.get("code");
-    this.setState({ showWelcomeScreen: !(code || isTokenValid) });
-    if ((code || isTokenValid) && this.mounted) {
-      getEvents().then((events) => {
-        if (this.mounted) {
-          this.setState({
-            events: events.slice(0, this.state.numberOfEvents),
-            locations: extractLocations(events),
-          });
+    async componentDidMount() {
+        this.mounted = true;
+        const isOffline = navigator.onLine ? false : true;
+        this.setState({
+            offlineInfo: isOffline
+                ? "No internet connection. Data is loaded from cache."
+                : null
+        });
+        getEvents().then((events) => {
+            if (this.mounted) {
+                this.setState({ 
+                    events: events.slice(0, this.state.numberOfEvents), 
+                    locations: extractLocations(events)
+                });
+            }
+        });
+    }
+
+    componentWillUnmount(){
+        this.mounted = false;
+    }
+
+    updateEvents = (location, maxNumEvents) => {
+        if (maxNumEvents === undefined) {
+            maxNumEvents = this.state.numberOfEvents;
+        } else(
+            this.setState({ numberOfEvents: maxNumEvents })
+        )
+        if (location === undefined) {
+            location = this.state.locationSelected;
         }
-      });
+        getEvents().then((events) => {
+            let locationEvents = (location === 'all') 
+                ? events 
+                : events.filter((event) => event.location === location);
+            const isOffline = navigator.onLine ? false : true;
+            this.setState({
+                events: locationEvents.slice(0, maxNumEvents),
+                numberOfEvents: maxNumEvents,
+                locationSelected: location,
+                offlineInfo: isOffline
+                    ? "No internet connection. Data is loaded from cache."
+                    : null
+            });
+        });
     }
-  }
 
-  componentWillUnmount() {
-    this.mounted = false;
-  }
+    render() {
+        return (
+            <div className="App">
+                
+                <CitySearch 
+                    locations={this.state.locations}  
+                    updateEvents={this.updateEvents} />
+                <NumberOfEvents 
+                    events={this.state.events}
+                    updateEvents={this.updateEvents}/>
+                <div className="warningAlert">
+                    <WarningAlert text={this.state.offlineInfo} />
+                </div>
+                <EventList 
+                    events={this.state.events}/>  
 
-  updateEvents = (location, eventCount) => {
-    !location
-      ? (location = this.state.currentLocation)
-      : this.setState({ currentLocation: location });
-    !eventCount
-      ? (eventCount = this.state.numberOfEvents)
-      : this.setState({ numberOfEvents: eventCount });
-    getEvents().then((events) => {
-      const locationEvents =
-        location === "all"
-          ? events
-          : events.filter((event) => event.location === location);
-      this.setState({
-        events: locationEvents.slice(0, eventCount),
-      });
-    });
-  };
-
-  render() {
-    const { showWelcomeScreen } = this.state;
-
-    if (showWelcomeScreen === undefined) {
-      return <div className="App" />;
-    } else if (showWelcomeScreen === true) {
-      return (
-        <WelcomeScreen
-          showWelcomeScreen={this.state.showWelcomeScreen}
-          getAccessToken={() => {
-            getAccessToken();
-          }}
-        />
-      );
-    } else {
-      return (
-        <div className="App">
-          <div className="offline_alert_container">
-            {!this.state.isOnline && (
-              <OfflineAlert
-                style={{ top: 0 }}
-                text={
-                  "You are offline. An updated list will be loaded when you are back online."
-                }
-              />
-            )}
-          </div>
-          <CitySearch
-            updateEvents={this.updateEvents}
-            locations={this.state.locations}
-          />{" "}
-          <NumberOfEvents updateEvents={this.updateEvents} />
-          <EventList events={this.state.events} />
-        </div>
-      );
+            </div>
+        );
     }
-  }
 }
 
 export default App;
